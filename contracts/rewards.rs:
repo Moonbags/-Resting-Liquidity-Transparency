@@ -1,0 +1,45 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+
+declare_id!("REWARD11111111111111111111111111111111111111");
+
+#[program]
+pub mod rewards {
+    use super::*;
+
+    pub fn distribute_rewards(ctx: Context<DistributeRewards>, amount: u64) -> Result<()> {
+        let reward_account = &mut ctx.accounts.reward_account;
+        reward_account.total_rewards += amount;
+
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.vault.to_account_info(),
+                    to: ctx.accounts.user_collateral.to_account_info(),
+                    authority: ctx.accounts.program_authority.to_account_info(),
+                },
+            ),
+            amount,
+        )?;
+
+        Ok(())
+    }
+}
+
+#[account]
+pub struct RewardAccount {
+    pub total_rewards: u64,
+}
+
+#[derive(Accounts)]
+pub struct DistributeRewards<'info> {
+    #[account(mut)]
+    pub reward_account: Account<'info, RewardAccount>,
+    #[account(mut)]
+    pub vault: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub user_collateral: Account<'info, TokenAccount>,
+    pub program_authority: Signer<'info>,
+    pub token_program: Program<'info, Token>,
+}
