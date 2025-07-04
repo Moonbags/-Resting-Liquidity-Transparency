@@ -1,0 +1,9 @@
+# Resting Liquidity Transparency Proposal
+## Why This Matters
+Drift’s JIT liquidity hides orders, screwing takers. I’m proposing **DROC**—on-chain, time-bound orders with collateral (0.01 SOL or JitoSOL) for a real orderbook. The **Resting Liquidity Vault** lets users deposit assets to deepen liquidity, earning DRIFT/$JTO. It’s transparent, adaptable, and ties into JitoSOL/SOL pools.
+
+## Mechanics
+- **DROC**: Orders lock collateral, visible on-chain, expire after set blocks.
+- **Vault**: Users deposit SOL/JitoSOL, boosting orderbook depth, earning rewards.
+- **Rewards**: Based on order duration/spread, paid in DRIFT/$JTO.
+- **Governance**: DAO can tweak parameters in emergencies.
