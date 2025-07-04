@@ -1,0 +1,107 @@
+contracts/droc.rs:
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+
+declare_id!("DROC111111111111111111111111111111111111111");
+
+#[program]
+pub mod droc {
+    use super::*;
+
+    pub fn submit_droc(
+        ctx: Context<SubmitDROC>,
+        price: u64,
+        size: u64,
+        expiry_duration: u64,
+        collateral_amount: u64,
+        jit_enabled: bool,
+        side: Side,
+    ) -> Result<()> {
+        let order = &mut ctx.accounts.order;
+        order.owner = *ctx.accounts.maker.key;
+        order.price = price;
+        order.size = size;
+        order.expiry_block = Clock::get()?.slot + expiry_duration;
+        order.collateral_locked = collateral_amount;
+        order.jit_enabled = jit_enabled;
+        order.side = side;
+
+        // Transfer collateral to vault
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.maker_collateral.to_account_info(),
+                    to: ctx.accounts.vault.to_account_info(),
+                    authority: ctx.accounts.maker.to_account_info(),
+                },
+            ),
+            collateral_amount,
+        )?;
+
+        Ok(())
+    }
+
+    pub fn match_droc(ctx: Context<MatchDROC>, size: u64) -> Result<()> {
+        let order = &mut ctx.accounts.order;
+        order.size -= size;
+        if order.size == 0 {
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.vault.to_account_info(),
+                        to: ctx.accounts.maker_collateral.to_account_info(),
+                        authority: ctx.accounts.program_authority.to_account_info(),
+                    },
+                ),
+                order.collateral_locked,
+            )?;
+            order.close(ctx.accounts.program_authority.to_account_info())?;
+        }
+        Ok(())
+    }
+}
+
+#[account]
+pub struct RestingOrderCommitment {
+    pub owner: Pubkey,
+    pub price: u64,
+    pub size: u64,
+    pub expiry_block: u64,
+    pub collateral_locked: u64,
+    pub jit_enabled: bool,
+    pub side: Side,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub enum Side {
+    Bid,
+    Ask,
+}
+
+#[derive(Accounts)]
+pub struct SubmitDROC<'info> {
+    #[account(init, payer = maker, space = 8 + 32 + 8 + 8 + 8 + 1 + 1)]
+    pub order: Account<'info, RestingOrderCommitment>,
+    #[account(mut)]
+    pub maker: Signer<'info>,
+    #[account(mut)]
+    pub maker_collateral: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub vault: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct MatchDROC<'info> {
+    #[account(mut)]
+    pub order: Account<'info, RestingOrderCommitment>,
+    #[account(mut)]
+    pub maker_collateral: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub vault: Account<'info, TokenAccount>,
+    pub program_authority: Signer<'info>,
+    pub token_program: Program<'info, Token>,
+}
