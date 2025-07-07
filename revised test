@@ -1,0 +1,19 @@
+import pandas as pd
+
+# Placeholder data—replace with Dune Analytics or Pyth Network
+data = pd.DataFrame({
+    'date': ['2025-01-01', '2025-01-02'],
+    'volume': [1_000_000_000, 10_000_000],
+    'price': [100, 90]
+})
+
+def calc_fees(volume, taker_fee=0.001, rebate=0.0001):
+    return volume * (taker_fee - rebate)
+
+def calc_rewards(blocks_per_day=15*86400, drifty_per_block=100, price=1):
+    return blocks_per_day * drifty_per_block * price
+
+for index, row in data.iterrows():
+    fees = calc_fees(row['volume'])
+    rewards = calc_rewards(price=row['price'])
+    print(f"Date: {row['date']}, Fees: ${fees:,.0f}, Rewards: ${rewards:,.0f}, Sustainable: {fees >= rewards}")
