@@ -1,4 +1,4 @@
-Certainly! Here’s a universal, copy-paste-ready README for your Resting Liquidity Transparency (DROC) project, designed to work with any protocol, not just Drift. It highlights cross-protocol support and composability, with sections you can further customize for specific integrations or assets.
+
 
 Resting Liquidity Transparency
 Decentralized Resting Order Commitments (DROC) & Resting Liquidity Vault
