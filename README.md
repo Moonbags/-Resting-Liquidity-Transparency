@@ -60,12 +60,7 @@ Feedback, collaboration, and integration requests are welcome—reach out via X 
 License:
 MIT License—free to use, modify, and distribute.
 
-Copy, customize, and integrate DROC and the Resting Liquidity Vault with your protocol to unlock transparent, on-chain liquidity and enhanced user trust.
-
-Let me know if you want this README tailored to a specific protocol or asset set!
-
-Take out time frames of completion from start
-Here’s your README with all time frames and date-based completion estimates removed, so it’s protocol-agnostic and not tied to any development schedule. You can copy and paste this version:
+Copy, customize, and integrate DROC and the Resting Liquidity Vault with your protocol to unlock transparent, on-chain liquidity and enhanced user 
 
 Resting Liquidity Transparency
 Decentralized Resting Order Commitments (DROC) & Resting Liquidity Vault
